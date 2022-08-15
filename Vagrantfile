@@ -47,7 +47,7 @@ Vagrant.configure("2") do |config|
 #	# ssh rather than https, but the VM doesn't have permission to clone
 #	# with ssh
 #	config.vm.provision "shell", inline: "sudo -u vagrant git clone --single-branch -b slurm-22.05 https://github.com/SchedMD/slurm.git /home/vagrant/slurm/22.05/slurm; exit 0"
-#	config.vm.provision "file", source: "~/slurm/vagrant1/init.conf", destination: "/home/vagrant/slurm/22.05/install/init.conf"
+#	config.vm.provision "file", source: "~/slurm/vagrant/init.conf", destination: "/home/vagrant/slurm/22.05/install/init.conf"
 #	config.vm.provision "shell", inline: "mysql -e \"drop user if exists vagrant@localhost; create user vagrant@localhost; grant all on *.* to 'vagrant'@'localhost';\""
 #	config.vm.provision "shell", inline: "cd /home/vagrant/slurm/22.05/install; sudo -u vagrant ./setup.sh"
 
@@ -150,7 +150,7 @@ Vagrant.configure("2") do |config|
 
 	# Copy Slurm configuration files
 #	config.vm.provision "shell", inline: "mkdir -p /usr/local/etc/slurm"
-#	config.vm.provision "file", source: "~/slurm/vagrant1/etc", destination: "/home/vagrant/slurm/etc"
+#	config.vm.provision "file", source: "~/slurm/vagrant/etc", destination: "/home/vagrant/slurm/etc"
 #	config.vm.provision "shell", inline: <<-SHELL
 #		cp /home/vagrant/slurm/etc/* /usr/local/etc/slurm/
 #		chown slurm:slurm /usr/local/etc/slurm/*
