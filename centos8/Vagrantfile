@@ -54,7 +54,7 @@ Vagrant.configure("2") do |config|
 	# Disable NFS sync at start
 	#config.vm.synced_folder '.', '/vagrant', disabled: true
 	# NFS share Slurm source
-	config.vm.synced_folder "/home/marshall/slurm/vagrant_centos8", "/opt/slurm", disabled: false, type: "nfs", nfs_version: "4"
+	config.vm.synced_folder "/home/marshall/slurm/vagrant/centos8/22.05", "/opt/slurm/22.05", disabled: false, type: "nfs", nfs_version: "4"
 
 	config.vm.provision "shell" do |shell|
 		shell.reboot = true

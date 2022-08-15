@@ -1,0 +1,11 @@
+# .gitignore
+bin
+include
+lib/*
+log/*
+run/*
+sbin
+spool
+state
+# job output files
+*.out
