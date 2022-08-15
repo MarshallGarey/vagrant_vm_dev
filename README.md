@@ -26,3 +26,6 @@ Cmnd_Alias VAGRANT_NFSD_START = /etc/init.d/nfs-kernel-server start
 Cmnd_Alias VAGRANT_NFSD_APPLY = /usr/sbin/exportfs -ar
 %sudo ALL=(root) NOPASSWD: VAGRANT_EXPORTS_CHOWN, VAGRANT_EXPORTS_MV, VAGRANT_NFSD_CHECK, VAGRANT_NFSD_START, VAGRANT_NFSD_APPLY
 ```
+
+In my Vagrantfile, I'm forcing nfs to use version 4 because my host machine
+has version 4 and the VM's need to match.
