@@ -1,10 +1,12 @@
 # .gitignore
 bin
 include
+lib64
 lib/*
 log/*
 run/*
 sbin
+share
 spool
 state
 # job output files
