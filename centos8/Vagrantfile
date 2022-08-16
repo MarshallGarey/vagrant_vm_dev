@@ -32,24 +32,6 @@ Vagrant.configure("2") do |config|
 		gcc -o whereami whereami.c
 		cp whereami /usr/bin/whereami
 	SHELL
-	#config.vm.provision "file", source: "~/.emacs", destination: ".emacs"
-
-
-	# Setup multiple-slurmd which I usually don't need. Useful if I only
-	# want just one VM to test something on another OS.
-#	# Make my slurm directory. Use -p to ignore if it already exists.
-#	config.vm.provision "shell", inline: "mkdir -p ~/slurm"
-#	# Put make.py in a standard install location (already copied from tools)
-#	config.vm.provision "shell", inline: "cp /home/vagrant/tools/make.py /usr/bin/make.py"
-#	# exit zero so git clone doesn't fail if it already exists
-#	config.vm.provision "shell", inline: "sudo -u vagrant git clone https://github.com/MarshallGarey/slurm-multicluster-dev.git /home/vagrant/slurm/22.05/install; exit 0"
-#	# clone slurm because my setup script clones it with
-#	# ssh rather than https, but the VM doesn't have permission to clone
-#	# with ssh
-#	config.vm.provision "shell", inline: "sudo -u vagrant git clone --single-branch -b slurm-22.05 https://github.com/SchedMD/slurm.git /home/vagrant/slurm/22.05/slurm; exit 0"
-#	config.vm.provision "file", source: "~/slurm/vagrant/init.conf", destination: "/home/vagrant/slurm/22.05/install/init.conf"
-#	config.vm.provision "shell", inline: "mysql -e \"drop user if exists vagrant@localhost; create user vagrant@localhost; grant all on *.* to 'vagrant'@'localhost';\""
-#	config.vm.provision "shell", inline: "cd /home/vagrant/slurm/22.05/install; sudo -u vagrant ./setup.sh"
 
 	# Disable NFS sync at start
 	#config.vm.synced_folder '.', '/vagrant', disabled: true
@@ -113,7 +95,12 @@ Vagrant.configure("2") do |config|
 			systemctl restart munge
 
 			# Setup a second network.
-#			echo -e \"192.168.255.10\tdbd\" >/etc/hosts
+			# This doesn't play nice with Slurm as-is - I think
+			# more or different configuration is needed.
+			# FIXME: this always appends. I could just overwrite
+			# /etc/hosts but there's some stuff already in
+			# /etc/hosts that I would be overwriting.
+#			echo -e \"192.168.255.10\tdbd\" >>/etc/hosts
 #			echo -e \"192.168.255.11\tctld\" >>/etc/hosts
 #			echo -e \"192.168.255.12\tctld-backup\" >>/etc/hosts
 
@@ -129,37 +116,13 @@ Vagrant.configure("2") do |config|
 			# user, it's easier just to add a user to the VM with
 			# my same username and UID.
 			useradd --uid 1017 marshall
-
-			mount -a
-
-
-			# git clone slurm; (rm -rf it first to make sure we get
-			# the latest commit
-#			sudo -u vagrant mkdir -p /home/vagrant/slurm/22.05
-#			cd /home/vagrant/slurm/22.05
-#			rm -rf slurm
-#			sudo -u vagrant git clone --single-branch -b slurm-22.05 \
-#				https://github.com/SchedMD/slurm.git \
-#				/home/vagrant/slurm/22.05/slurm
-#			sudo -u vagrant mkdir build
-#			cd build
-#			../slurm/configure \
-#				--prefix=/opt/slurm/22.05/install \
-#				--enable-developer \
-#				--disable-optimizations \
-#				--with-systemdsystemunitdir=/etc/systemd/system
-#			make.py -a
-#			"
+			"
 	end
 
-	# Copy Slurm configuration files
-#	config.vm.provision "shell", inline: "mkdir -p /usr/local/etc/slurm"
-#	config.vm.provision "file", source: "~/slurm/vagrant/etc", destination: "/home/vagrant/slurm/etc"
-#	config.vm.provision "shell", inline: <<-SHELL
-#		cp /home/vagrant/slurm/etc/* /usr/local/etc/slurm/
-#		chown slurm:slurm /usr/local/etc/slurm/*
-#		chown slurm:slurm /usr/local/etc/slurm
-#	SHELL
+	# Mount synced folders when provisioning
+	config.vm.provision "shell", inline: <<-SHELL
+		mount -a
+	SHELL
 
 	# node definitions
 	config.vm.define "dbd" do |dbd|
@@ -177,10 +140,6 @@ Vagrant.configure("2") do |config|
 			mysql -e "create user if not exists slurm"
 			mysql -e "create database if not exists slurm_acct_db"
 			mysql -e "grant all on slurm_acct_db.* to 'slurm'"
-
-			# Enable slurmdbd
-#			systemctl enable slurmdbd
-#			systemctl start slurmdbd
 		SHELL
 	end
 	config.vm.define "ctld" do |ctld|
@@ -190,12 +149,6 @@ Vagrant.configure("2") do |config|
 #			:libvirt__netmask => '255.255.255.0',
 #			:libvirt__network_name => 'clusternet',
 #			:libvirt__forward_mode => 'none'
-
-#		ctld.vm.provision "shell", inline: <<-SHELL
-#			# Enable slurmctld
-#			systemctl enable slurmctld
-#			systemctl start slurmctld
-#SHELL
 	end
 
 	# 2 nodes by default
@@ -216,12 +169,6 @@ Vagrant.configure("2") do |config|
 #					{:cpus => "2-3", :memory => "2048"},
 #				]
 #			end
-
-#			config.vm.provision "shell", inline: <<-SHELL
-#				# Enable slurmd
-#				systemctl enable slurmd
-#				systemctl start slurmd
-#SHELL
 		end
 	end
 end
