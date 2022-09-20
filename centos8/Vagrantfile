@@ -15,7 +15,7 @@ Vagrant.configure("2") do |config|
 
 	# Pull over some useful files
 	config.vm.provision "file", source: "~/.gitconfig", destination: ".gitconfig"
-#config.vm.provision "file", source: "~/.bashrc", destination: ".bashrc"
+	config.vm.provision "file", source: "bashrc", destination: ".bashrc"
 	config.vm.provision "file", source: "~/.vimrc", destination: ".vimrc"
 	config.vm.provision "file", source: "~/.viminfo", destination: ".viminfo"
 
@@ -123,6 +123,8 @@ Vagrant.configure("2") do |config|
 			# my same username and UID.
 			# Only add if this user does not exist
 			id -u marshall > /dev/null 2>&1 || useradd --uid 1017 marshall
+			sudo cp /home/vagrant/.bashrc /home/marshall/.bashrc
+			chown marshall:marshall /home/marshall/.bashrc
 			"
 	end
 
