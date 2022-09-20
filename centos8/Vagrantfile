@@ -48,7 +48,8 @@ Vagrant.configure("2") do |config|
 			"yum -y install dnf-plugins-core epel-release
 			yum config-manager --set-enabled powertools
 			yum groupinstall -y 'Development Tools'
-			yum -y install check-devel \
+			yum -y install ccache \
+				check-devel \
 				dbus-devel \
 				dejagnu \
 				expect \
