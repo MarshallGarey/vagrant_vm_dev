@@ -149,6 +149,10 @@ cd .
 # ccache
 export PATH=/lib64/ccache:$PATH
 
+# Slurm
+export PATH=/opt/slurm/22.05/install/bin:$PATH
+export PATH=/opt/slurm/22.05/install/sbin:$PATH
+
 function makepy()
 {
 	date
