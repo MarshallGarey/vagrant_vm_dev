@@ -23,6 +23,7 @@ Vagrant.configure("2") do |config|
 	# copying the .vim/ directory is being slow
 #config.vm.provision "file", source: "~/.vim", destination: "/tmp/.vim"
 #config.vm.provision "file", source: "~/tools", destination: "/tmp/tools"
+	config.vm.provision "file", source: "~/tools/whereami.c", destination: "/tmp/whereami.c"
 
 	config.vm.provision "shell", inline: <<-SHELL
 		# Move directories
@@ -31,10 +32,9 @@ Vagrant.configure("2") do |config|
 #		rm -rf /home/vagrant/tools
 #		mv /tmp/tools /home/vagrant/tools
 
-		# compile whereami.c in tools
-		cd /home/vagrant/tools
-		gcc -o whereami whereami.c
-		cp whereami /usr/bin/whereami
+		# compile whereami.c
+		cd /tmp
+		gcc -o /usr/bin/whereami whereami.c
 	SHELL
 
 	# Disable NFS sync at start
