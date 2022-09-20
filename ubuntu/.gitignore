@@ -1,0 +1,3 @@
+# .gitignore
+vagrant_provision*.log
+.vagrant
