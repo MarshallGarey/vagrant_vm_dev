@@ -149,12 +149,6 @@ cd .
 # ccache
 export PATH=/lib64/ccache:$PATH
 
-# Path to OpenMPI (includes things like mpicc and mpirun)
-export PATH=/home/marshall/openmpi/install/bin:$PATH
-# Path to PMIX v3
-export PATH=/home/marshall/pmix/install_3.2/bin:$PATH
-
-#alias makepy='date && time make.py'
 function makepy()
 {
 	date
