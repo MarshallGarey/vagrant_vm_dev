@@ -153,6 +153,22 @@ export PATH=/lib64/ccache:$PATH
 export PATH=/opt/slurm/22.05/install/bin:$PATH
 export PATH=/opt/slurm/22.05/install/sbin:$PATH
 
+function configureslurm()
+{
+	mkdir -p /opt/slurm/22.05/install/lib
+	mkdir -p /opt/slurm/22.05/build
+	cd /opt/slurm/22.05/build
+	../slurm/configure --prefix=/opt/slurm/22.05/install --enable-developer --disable-optimizations --with-pam_dir=/opt/slurm/22.05/install/lib
+	cd -
+}
+
+function makeslurm()
+{
+	cd /opt/slurm/22.05/build
+	makepy $@
+	cd -
+}
+
 function makepy()
 {
 	date
