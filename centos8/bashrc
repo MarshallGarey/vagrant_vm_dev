@@ -147,7 +147,7 @@ function cd()
 cd .
 
 # ccache
-export PATH=/usr/lib/ccache:$PATH
+export PATH=/lib64/ccache:$PATH
 
 # Path to OpenMPI (includes things like mpicc and mpirun)
 export PATH=/home/marshall/openmpi/install/bin:$PATH
