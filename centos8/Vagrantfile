@@ -151,8 +151,12 @@ Vagrant.configure("2") do |config|
 			systemctl enable mariadb
 			systemctl start mariadb
 			mysql -e "create user if not exists slurm"
+			mysql -e "create user if not exists vagrant"
+			mysql -e "create user if not exists marshall"
 			mysql -e "create database if not exists slurm_acct_db"
 			mysql -e "grant all on slurm_acct_db.* to 'slurm'"
+			mysql -e "grant all on *.* to 'vagrant'"
+			mysql -e "grant all on *.* to 'marshall'"
 		SHELL
 	end
 	config.vm.define "ctld" do |ctld|
