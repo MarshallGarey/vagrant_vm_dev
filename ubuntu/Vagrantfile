@@ -50,6 +50,7 @@ Vagrant.configure("2") do |config|
 				git \
 				glibc-tools \
 				hdf5-tools \
+				hwloc \
 				infiniband-diags \
 				libcurl4-gnutls-dev \
 				libdbus-1-dev \
@@ -81,6 +82,7 @@ Vagrant.configure("2") do |config|
 				mariadb-client \
 				mariadb-server \
 				munge \
+				net-tools \
 				numactl \
 				openssh-server \
 				perl \
