@@ -36,7 +36,8 @@ Vagrant.configure("2") do |config|
 	config.vm.provision "shell" do |shell|
 		shell.reboot = true
 		shell.inline =
-			"apt update
+			"
+			apt update
 			apt -y install \
 				autoconf \
 				build-essential \
@@ -100,17 +101,6 @@ Vagrant.configure("2") do |config|
 			systemctl enable munge
 			systemctl restart munge
 
-			# Setup a second network.
-			# This doesn't play nice with Slurm as-is - I think
-			# more or different configuration is needed.
-			# FIXME: this always appends. I could just overwrite
-			# /etc/hosts but there's some stuff already in
-			# /etc/hosts that I would be overwriting.
-#			echo -e \"192.168.255.10\tdbd\" >>/etc/hosts
-#			echo -e \"192.168.255.11\tctld\" >>/etc/hosts
-#			echo -e \"192.168.255.12\tctld-backup\" >>/etc/hosts
-
-
 			groupadd --gid 500 slurm
 			useradd -r --uid 500 --gid 500 --shell /sbin/nologin slurm
 			mkdir -p /var/log/slurm /var/spool/slurm /run/slurm
@@ -124,7 +114,19 @@ Vagrant.configure("2") do |config|
 			# Only add if this user does not exist
 			groupadd --gid 1017 marshall
 			id -u marshall > /dev/null 2>&1 || useradd --create-home --uid 1017 --gid 1017 marshall
+			sudo cp /home/vagrant/.bashrc /home/marshall/.bashrc
+			chown marshall:marshall /home/marshall/.bashrc
 
+			# Move directories
+#			rm -rf /home/vagrant/.vim
+#			mv /tmp/.vim /home/vagrant/.vim
+#			rm -rf /home/vagrant/tools
+#			mv /tmp/tools /home/vagrant/tools
+
+			mv /home/vagrant/make.py /usr/bin/make.py
+
+			# compile whereami.c
+			gcc -o /usr/bin/whereami /home/vagrant/whereami.c
 
 			# Use the DNS server from DHCP
 			sed -i 's/^[[:space:]].*nameservers:/#&/g' /etc/netplan/01-netcfg.yaml
@@ -136,35 +138,9 @@ Vagrant.configure("2") do |config|
 			"
 	end
 
-	config.vm.provision "shell", inline: <<-SHELL
-		sudo cp /home/vagrant/.bashrc /home/marshall/.bashrc
-		chown marshall:marshall /home/marshall/.bashrc
-	SHELL
-
-	config.vm.provision "shell", inline: <<-SHELL
-		# Move directories
-#		rm -rf /home/vagrant/.vim
-#		mv /tmp/.vim /home/vagrant/.vim
-#		rm -rf /home/vagrant/tools
-#		mv /tmp/tools /home/vagrant/tools
-
-		# make.py
-		mv /home/vagrant/make.py /usr/bin/make.py
-
-		# compile whereami.c
-		cd /home/vagrant
-		gcc -o /usr/bin/whereami whereami.c
-	SHELL
-
 	# node definitions
 	config.vm.define "dbd" do |dbd|
 		dbd.vm.hostname = "dbd"
-
-#		dbd.vm.network :private_network,
-#			:ip => '192.168.255.10',
-#			:libvirt__netmask => '255.255.255.0',
-#			:libvirt__network_name => 'clusternet',
-#			:libvirt__forward_mode => 'none'
 		dbd.vm.provision "shell", inline: <<-SHELL
 			apt -y install mariadb-server
 			mkdir -p /etc/my.cnf.d
@@ -182,11 +158,6 @@ Vagrant.configure("2") do |config|
 	end
 	config.vm.define "ctld" do |ctld|
 		ctld.vm.hostname = "ctld"
-#		ctld.vm.network :private_network,
-#			:ip => '192.168.255.11',
-#			:libvirt__netmask => '255.255.255.0',
-#			:libvirt__network_name => 'clusternet',
-#			:libvirt__forward_mode => 'none'
 	end
 
 	# 2 nodes by default
@@ -194,11 +165,6 @@ Vagrant.configure("2") do |config|
 	(1..nodecnt).each do |i|
 		config.vm.define "node#{i - 1}" do |node|
 			node.vm.hostname = "node#{i - 1}"
-#			node.vm.network :private_network,
-#				:ip => "192.168.255.#{nodecnt + 99}",
-#				:libvirt__netmask => '255.255.255.0',
-#				:libvirt__network_name => 'clusternet',
-#				:libvirt__forward_mode => 'none'
 			# cluster nodes get 2 numa nodes
 #			config.vm.provider :libvirt do |node|
 #				node.cpus = 4
