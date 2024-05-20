@@ -38,7 +38,7 @@ Vagrant.configure("2") do |config|
 		shell.inline =
 			"
 			apt update
-			apt -y install \
+			apt -y --fix-missing install \
 				autoconf \
 				build-essential \
 				ccache \
