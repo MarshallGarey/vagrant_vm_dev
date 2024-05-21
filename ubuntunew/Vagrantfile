@@ -22,7 +22,7 @@ Vagrant.configure("2") do |config|
 	config.vm.provision "file", source: "~/.viminfo", destination: ".viminfo"
 
 	# Directories (need the full path):
-	# copying the .vim/ directory is being slow
+	# FIXME copying the .vim/ directory is being slow
 #config.vm.provision "file", source: "~/.vim", destination: "/tmp/.vim"
 #config.vm.provision "file", source: "~/tools", destination: "/tmp/tools"
 	config.vm.provision "file", source: "~/tools/whereami.c", destination: "/home/vagrant/whereami.c"
@@ -124,6 +124,7 @@ Vagrant.configure("2") do |config|
 			usermod -a -G slurm vagrant
 
 			# Move directories
+                        # FIXME this is slow.
 #			rm -rf /home/vagrant/.vim
 #			mv /tmp/.vim /home/vagrant/.vim
 #			rm -rf /home/vagrant/tools
@@ -169,12 +170,14 @@ Vagrant.configure("2") do |config|
 			# Make etc and build directories
 			mkdir -p /opt/slurm/etc
 			mkdir -p /opt/slurm/build
+                        chown slurm:slurm /opt/slurm/build /opt/slurm/etc
 		SHELL
 
 	end
 
-	# TODO: Also provision a login node with a different name.
-	# TODO: It would be nice if the nodes had different hardware.
+	# TODO: Provision the login node with a different name.
+	# TODO: It would be nice if the compute nodes had different hardware
+        # from each other.
 	# 3 nodes by default
 	nodecnt = (ENV.fetch('SLURMD_NODE_CNT') { "3" }).to_i()
 	(1..nodecnt).each do |i|
