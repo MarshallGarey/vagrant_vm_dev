@@ -109,17 +109,19 @@ Vagrant.configure("2") do |config|
 
 			# My username is marshall and UID is 1017 on the host
 			# machine. Since I'm mounting a directory owned by my
-			# user, it's easier just to add a user to the VM with
-			# my same username and UID.
+                        # user, add a user to the VM with my same username and
+                        # UID.
 			# Only add if this user does not exist
 			groupadd --gid 1017 marshall
 			id -u marshall > /dev/null 2>&1 || useradd --create-home --uid 1017 --gid 1017 marshall
 			sudo cp /home/vagrant/.bashrc /home/marshall/.bashrc
 			chown marshall:marshall /home/marshall/.bashrc
-			# TODO: It would be easier to just add vagrant to
-			# marshall's group so that vagrant can see and modify
-			# files owned by marshall
+                        # Add vagrant to marshall's group so that vagrant can
+                        # read files owned by marshall.
 			usermod -a -G marshall vagrant
+                        # Add vagrant to slurm's group to vagrant can easily
+                        # read files owned by slurm
+			usermod -a -G slurm vagrant
 
 			# Move directories
 #			rm -rf /home/vagrant/.vim
