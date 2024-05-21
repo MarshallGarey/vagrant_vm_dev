@@ -1,0 +1,191 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+Vagrant.configure("2") do |config|
+	# TODO: the nodes are actually on ubunut 22.04. I might need to start over.
+	config.vm.box = "generic/ubuntu2304"
+	# Default hardware setup
+	config.vm.provider :libvirt do |libvirt|
+		libvirt.cpus = 40
+		libvirt.cputopology :sockets => '2', :cores => '10', :threads => '2'
+		libvirt.memory = 2048
+		# Set clock to localtime instead of UTC
+		libvirt.clock_offset = 'localtime'
+	end
+
+	# Allow ssh forwarding
+	config.ssh.forward_agent = true
+	config.ssh.forward_x11 = true
+
+	# Pull over some useful files
+	config.vm.provision "file", source: "~/.gitconfig", destination: ".gitconfig"
+	config.vm.provision "file", source: "bashrc", destination: ".bashrc"
+	config.vm.provision "file", source: "~/.vimrc", destination: ".vimrc"
+	config.vm.provision "file", source: "~/.viminfo", destination: ".viminfo"
+
+	# Directories (need the full path):
+	# copying the .vim/ directory is being slow
+#config.vm.provision "file", source: "~/.vim", destination: "/tmp/.vim"
+#config.vm.provision "file", source: "~/tools", destination: "/tmp/tools"
+	config.vm.provision "file", source: "~/tools/whereami.c", destination: "/home/vagrant/whereami.c"
+	config.vm.provision "file", source: "~/tools/make.py", destination: "/home/vagrant/make.py"
+
+	# Disable NFS sync at start
+	#config.vm.synced_folder '.', '/vagrant', disabled: true
+	# NFS share Slurm source
+	config.vm.synced_folder "/home/marshall/slurm/vagrant_vm_dev/ubuntunew/24.05", "/opt/slurm/24.05", disabled: false, type: "nfs", nfs_version: "4"
+
+	config.vm.provision "shell" do |shell|
+		shell.reboot = true
+		shell.inline =
+			"
+			apt update
+			apt -y --fix-missing install \
+				autoconf \
+				build-essential \
+				ccache \
+				check \
+				clang \
+				clang-tools \
+				dejagnu \
+				direnv \
+				expect \
+				flex \
+				gdb \
+				git \
+				glibc-tools \
+				hdf5-tools \
+				hwloc \
+				infiniband-diags \
+				libcurl4-gnutls-dev \
+				libdbus-1-dev \
+				libjwt-dev \
+				libevent-dev \
+				libfreeipmi-dev \
+				libgtk2.0-dev \
+				libhdf5-dev \
+				libhttp-parser-dev \
+				libhwloc-dev \
+				libibmad-dev \
+				libibumad-dev \
+				libibverbs-dev \
+				libipmi* \
+				libipmimonitoring-dev \
+				libjson-c-dev \
+				libmunge-dev \
+				libncurses-dev \
+				libpam0g-dev \
+				libpmix-dev \
+				librrd-dev \
+				libssh2-1-dev \
+				libssl-dev \
+				libyaml-dev \
+				liblua5.3-dev \
+				liblz4-dev \
+				man-db \
+				man2html \
+				mariadb-client \
+				mariadb-server \
+				munge \
+				net-tools \
+				numactl \
+				openssh-server \
+				perl \
+				python3 \
+				readline-common \
+				valgrind \
+				vim \
+				xorg-dev \
+				#######libnvidia-ml-dev \
+			echo thisismysecretmungekeythatis32bytes > /etc/munge/munge.key
+			chown munge:munge /etc/munge/munge.key
+			chmod 0400 /etc/munge/munge.key
+			systemctl enable munge
+			systemctl restart munge
+
+			groupadd --gid 500 slurm
+			useradd -r --uid 500 --gid 500 --shell /sbin/nologin slurm
+			mkdir -p /var/log/slurm /var/spool/slurm /run/slurm
+			chown slurm:slurm /var/log/slurm /var/spool/slurm /run/slurm
+			echo -e \"d\t/run/slurm\t0755\tslurm\tslurm\t-\t-\" > /etc/tmpfiles.d/slurm.conf
+
+			# My username is marshall and UID is 1017 on the host
+			# machine. Since I'm mounting a directory owned by my
+			# user, it's easier just to add a user to the VM with
+			# my same username and UID.
+			# Only add if this user does not exist
+			groupadd --gid 1017 marshall
+			id -u marshall > /dev/null 2>&1 || useradd --create-home --uid 1017 --gid 1017 marshall
+			sudo cp /home/vagrant/.bashrc /home/marshall/.bashrc
+			chown marshall:marshall /home/marshall/.bashrc
+			# TODO: It would be easier to just add vagrant to
+			# marshall's group so that vagrant can see and modify
+			# files owned by marshall
+			usermod -a -G marshall vagrant
+
+			# Move directories
+#			rm -rf /home/vagrant/.vim
+#			mv /tmp/.vim /home/vagrant/.vim
+#			rm -rf /home/vagrant/tools
+#			mv /tmp/tools /home/vagrant/tools
+
+			mv /home/vagrant/make.py /usr/bin/make.py
+
+			# compile whereami.c
+			gcc -o /usr/bin/whereami /home/vagrant/whereami.c
+
+			# Use the DNS server from DHCP
+			sed -i 's/^[[:space:]].*nameservers:/#&/g' /etc/netplan/01-netcfg.yaml
+			sed -i 's/^[[:space:]].*addresses:/#&/g' /etc/netplan/01-netcfg.yaml
+			netplan apply
+			sed -i 's/^DNS=.*/DNS=/' /etc/systemd/resolved.conf
+			sed -i 's/^Cache=yes/Cache=no/' /etc/systemd/resolved.conf
+			sed -i 's/^DNSStubListener=yes/DNSStubListener=no/' /etc/systemd/resolved.conf
+			"
+	end
+
+	# node definitions
+	config.vm.define "dbd" do |dbd|
+		dbd.vm.hostname = "dbd"
+		dbd.vm.provision "shell", inline: <<-SHELL
+			apt -y install mariadb-server
+			mkdir -p /etc/my.cnf.d
+			echo -e "[mysqld]\ninnodb_buffer_pool_size=1024M\ninnodb_log_file_size=256M\ninnodb_lock_wait_timeout=900" > /etc/my.cnf.d/slurm.cnf
+			systemctl enable mariadb
+			systemctl start mariadb
+			mysql -e "create user if not exists slurm"
+			mysql -e "create user if not exists vagrant"
+			mysql -e "create user if not exists marshall"
+			mysql -e "create database if not exists slurm_acct_db"
+			mysql -e "grant all on slurm_acct_db.* to 'slurm'"
+			mysql -e "grant all on *.* to 'vagrant'"
+			mysql -e "grant all on *.* to 'marshall'"
+		SHELL
+	end
+	config.vm.define "ctld" do |ctld|
+		ctld.vm.hostname = "ctld"
+		ctld.vm.provision "shell", inline: <<-SHELL
+			# Make etc and build directories
+			mkdir -p /opt/slurm/etc
+			mkdir -p /opt/slurm/build
+		SHELL
+
+	end
+
+	# TODO: Also provision a login node with a different name.
+	# TODO: It would be nice if the nodes had different hardware.
+	# 3 nodes by default
+	nodecnt = (ENV.fetch('SLURMD_NODE_CNT') { "3" }).to_i()
+	(1..nodecnt).each do |i|
+		config.vm.define "node#{i - 1}" do |node|
+			node.vm.hostname = "node#{i - 1}"
+			# cluster nodes get 2 numa nodes
+#			config.vm.provider :libvirt do |node|
+#				node.cpus = 4
+#				node.numa_nodes = [
+#					{:cpus => "0-1", :memory => "2048"},
+#					{:cpus => "2-3", :memory => "2048"},
+#				]
+#			end
+		end
+	end
+end

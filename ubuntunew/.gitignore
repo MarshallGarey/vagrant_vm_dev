@@ -1,0 +1,4 @@
+# .gitignore
+vagrant_provision*.log
+.vagrant
+24.05/slurm
