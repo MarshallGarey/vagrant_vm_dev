@@ -1,6 +1,0 @@
-/usr/bin/xauth:  file /home/vagrant/.Xauthority does not exist
-bash: slurmdbd: command not found
-/usr/bin/xauth:  file /home/vagrant/.Xauthority does not exist
-bash: slurmctld: command not found
-/usr/bin/xauth:  file /home/vagrant/.Xauthority does not exist
-bash: slurmd: command not found
