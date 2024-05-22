@@ -30,6 +30,32 @@ Cmnd_Alias VAGRANT_NFSD_APPLY = /usr/sbin/exportfs -ar
 In my Vagrantfile, I'm forcing nfs to use version 4 because my host machine
 has version 4 and the VM's need to match.
 
+### Useful Vagrant CLI
+See [the documentation](https://developer.hashicorp.com/vagrant/docs/cli) for
+the Vagrant CLI. That page also shows how to install autocompletion for Vagrant
+CLI, which supports bash and zsh.
+
+```
+vagrant autocomplete install --bash --zsh
+```
+
+#### Generate ssh config entries
+You can generate valid ssh config file entries to ssh directly into the machines
+using the following
+[command](https://developer.hashicorp.com/vagrant/docs/cli/ssh_config):
+
+```
+vagrant ssh-config
+```
+
+#### Validate the Vagrantfile
+[Validate](https://developer.hashicorp.com/vagrant/docs/cli/validate) the
+Vagrantfile with:
+
+```
+vagrant validate
+```
+
 ### Errors
 Vagrant cannot setup virtual machines if you do not have virtualization enabled.
 When you run `vagrant up`, you will see this error:
