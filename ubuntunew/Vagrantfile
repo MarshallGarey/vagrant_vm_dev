@@ -174,7 +174,6 @@ Vagrant.configure("2") do |config|
 			mkdir -p /opt/slurm/build
                         chown slurm:slurm /opt/slurm/build /usr/local/etc
 		SHELL
-
 	end
 
 	# TODO: Provision the login node with a different name.
