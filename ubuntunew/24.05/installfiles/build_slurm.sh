@@ -10,7 +10,7 @@
 # * On each compute and login node, set SLURMD_OPTIONS in /etc/default/slurmd
 #   to use the --conf-server option.
 
-#./sync_etc.sh
+./sync_etc.sh
 set -ex
 rsync setup_service_files.sh "vagrant@ctld:~/"
 vagrant ssh ctld -c '
