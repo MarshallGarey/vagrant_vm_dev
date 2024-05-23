@@ -8,3 +8,8 @@ vagrant_provision*.log
 24.05/installfiles/tmpetc/burst_buffer.lua
 24.05/installfiles/tmpetc/cli_filter.lua
 24.05/installfiles/tmpetc/jwt_hs256.key
+24.05/bin
+24.05/include
+24.05/lib
+24.05/sbin
+24.05/service
