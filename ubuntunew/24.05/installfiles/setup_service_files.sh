@@ -1,4 +1,6 @@
 #!/bin/bash
+# TODO: For sackd to work with configless, it needs to use SLURM_SACK_KEY to
+# point to the alternate location (/run/slurm/conf/).
 set -ex
 n=$(hostname)
 

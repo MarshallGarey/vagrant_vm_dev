@@ -11,6 +11,7 @@ for n in ${ctl_dbd_nodes[@]}; do
 	sudo chown slurm:slurm /usr/local/etc/*
 	sudo chmod 0600 /usr/local/etc/slurmdbd.conf
 	sudo chmod 0600 /usr/local/etc/jwt_hs256.key
+	sudo chmod 0600 /usr/local/etc/slurm.key
 	' &
 done
 wait
