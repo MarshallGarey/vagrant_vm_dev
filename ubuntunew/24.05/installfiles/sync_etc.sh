@@ -3,7 +3,7 @@
 # The compute and login nodes will be configless.
 ctl_dbd_nodes=("ctld" "dbd")
 for n in ${ctl_dbd_nodes[@]}; do
-	rsync -r tmpetc "vagrant@${n}:${HOME}"
+	rsync -r tmpetc "vagrant@${n}:/home/vagrant"
 	nohup vagrant ssh "${n}" -c '
 	sudo rm -rf /usr/local/etc
 	sudo mv ~/tmpetc /usr/local/etc

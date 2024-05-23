@@ -87,15 +87,11 @@ set -x
 # TODO: run vagrant ssh-config and add that to my .ssh/config file if it is
 # not already there.
 
-# TODO:
 # * Copy example scripts from slurm/etc/ to tmpetc
 get_scripts
 
 # Add my ssh key to all the nodes
 scp_ssh_key
 
-# Sync the etc directory to the ctld and dbd nodes.
-./sync_etc
-exit 0
-
+# build_slurm also syncs the etc directory.
 ./build_slurm.sh
