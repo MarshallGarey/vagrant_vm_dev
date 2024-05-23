@@ -10,8 +10,8 @@
 # * On each compute and login node, set SLURMD_OPTIONS in /etc/default/slurmd
 #   to use the --conf-server option.
 
-./sync_etc.sh
 set -ex
+./sync_etc.sh
 rsync setup_service_files.sh "vagrant@ctld:~/"
 vagrant ssh ctld -c '
 set -ex
@@ -27,8 +27,8 @@ sudo mkdir -p build
 sudo chown vagrant:vagrant build
 cd build
 mkdir -p "${service_confdir}"
-../24.05/slurm/configure --prefix="${prefix}" --enable-developer --disable-optimizations --enable-memory-leak-debug --with-systemdsystemunitdir="${service_confdir}" --sysconfdir=/usr/local/etc
-sudo make.py --with-extra etc
+../24.05/slurm/configure --prefix="${prefix}" --enable-developer --disable-optimizations --enable-memory-leak-debug --with-systemdsystemunitdir="${service_confdir}" --sysconfdir=/usr/local/etc --with-mysql_config
+sudo make.py -v --with-extra etc
 
 # Distribute the service files
 cd "${service_confdir}"
@@ -50,4 +50,6 @@ for n in ${clusternodes[@]}; do
 		ssh "${n}" bash -s < "${HOME}/setup_service_files.sh"
 	fi
 done
+# TODO: Enable the services on the appropriate nodes:
+# systemctl enable sackd, slurmdbd, slurmctld, slurmrestd
 '
